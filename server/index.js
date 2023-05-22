@@ -12,18 +12,26 @@ app.use('/images',express.static('uploads/'));
 const upload = multer({
     storage:multer.diskStorage({
         destination:(req,file,cb)=>{
-                cb(null,'uploads/')
+                cb(null,'uploads')
         },
         filename:(req,file,cb)=>{
             cb(null,`${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
         }
     }),
-}).single('uploadFile');
+}).array('uploadFile');
 
 app.post('/upload',upload,(req,res)=>{
-    if(req.file != null){
-        res.json({url:`http://${IP}:${PORT}/images/${req.file.filename}`});
+    if(req.files!= null){
+        let urls = [];
+        for(let i=0;i<req.files.length;i++){
+            
+            urls.push(`http://${IP}:${PORT}/images/${req.files[i]['filename']}`);
+        }
+        
+        res.json(urls);
     }
+
+  
 });
 
 app.listen(PORT,IP,() => {
